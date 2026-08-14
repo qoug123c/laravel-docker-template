@@ -14,11 +14,13 @@ class TodoController extends Controller
 
         return view('todo.index', ['todos' => $todos]);
     }
+
     public function create()
     {
         // TODO: 第1引数を指定
         return view('todo.create');
     }
+
     public function store(Request $request)
     {
         $inputs = $request->all();
@@ -28,5 +30,13 @@ class TodoController extends Controller
         $todo->save();
 
         return redirect()->route('todo.index');
+    }
+
+    public function show($id)
+    {
+        $model = new Todo();
+        $todo = $model->find($id);
+
+        return view('todo.show', ['todo' => $todo]);
     }
 }
