@@ -6,20 +6,30 @@
 <input type="hidden" name="_method" value="PUT">
 
 ### findメソッドの引数に指定しているIDは何のIDか
-todosテーブルのid絡む
+todosテーブルのidカラム
 
 ### findメソッドで実行しているSQLは何か
 select * from todos where id = {$id};
 
 ### findメソッドで取得できる値は何か
-id,content,created_at,updated_at
+findメソッドの引数：該当テーブルのプライマリーキー<br>
+- 該当のプライマリキーを持つ1件のレコード全体が、モデルオブジェクトとして取得できます。
+- 該当プライマリーキーのレコードがない場合はnullを返します。
 
 ### saveメソッドは何を基準にINSERTとUPDATEを切り替えているのか
 遷移してきたページ
 createページから遷移してきた場合：INSERT文を実行<br>
-  - createメソッドからviewページに指定しているaction属性に記述しているstoreメソッドを通過しているため。
+  - Routingファイル(routes/web.php)にて記述されている`Route::post`の記述を見て判別している。
 editページから遷移してきた場合：UPDATE文を実行<br>
-  - showメソッドのidを取得し、editページでもidの受け渡され、editメソッドで取得したidを条件にupdateメソッドで該当idのupdeteを通過しているため。
+  - Routingファイル(routes/web.php)にて記述されている`Route::put`の記述を見て判別している。<br>
+
+| ルーティング | 役割 | 主な利用シーン |
+| :--- | --- | --- |
+| `Route::get` | データの画面取得 | ページを表示する、詳細を見る |
+| `Route::post` | 新しいデータの追加 | 会員登録、新規投稿の送信 |
+| `Route::put` | 既存データの上書き更新 | プロフィールの変更、投稿記事の編集 |
+| `Route::delete` | データの削除 | アカウント削除、投稿削除 |
+
 
 ## Todo論理削除
 
@@ -45,8 +55,20 @@ editページから遷移してきた場合：UPDATE文を実行<br>
 ## その他
 
 ### TodoControllerクラスのコンストラクタはどのタイミングで実行されるか
-`$model = new Todo(); `と記述していたTodoクラスのインスタンス化する時。
-コンストラクタインジェクションを使用することでTodoクラスのインスタンスを生成し、`$todo`という変数に代入しています。
+```
+class TodoController extends Controller
+{
+    private $todo;
+
+    public function __construct(Todo $todo)
+    {
+        $this->todo = $todo;
+    }
+```
+上記はclass直下に`private $todo;`の記述があります。これはTodoController内どこでも呼び出し可能なクラスプロパティです。<br>
+合わせて、constructメソッド内、` $this->todo = $todo;`の記述でコンストラクタインジェクションで生成したTodoクラスのインスタンスをプロパティに代入しています。
+
+よって、ユーザーがWebサイトの特定のURLにアクセスした瞬間にコンストラクタは実行されます。
 
 ### RequestクラスからFormRequestクラスに変更した理由
 バリデーションを行うため。<br>
